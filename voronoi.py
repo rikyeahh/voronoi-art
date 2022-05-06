@@ -1,12 +1,8 @@
-import imagesize
-import os
 import numpy as np
 import matplotlib.pyplot as plt
-from PIL import Image, ImageOps
 from matplotlib import patches, path
 from scipy.spatial import Voronoi
 import cv2
-from setuptools import setup
 from tqdm import tqdm
 
 from utils import flip_and_resize, setup_plot
@@ -17,7 +13,7 @@ def shrink(polygon : np.ndarray, pad : float) -> np.ndarray:
     center = np.mean(polygon, axis=0)
     resized = np.zeros_like(polygon)
 
-    # reduced distance from the region center
+    # reduce distance from the region center
     for i, point in enumerate(polygon):
         vector = point - center
         unit_vector = vector / np.linalg.norm(vector)
@@ -46,7 +42,6 @@ class RoundedPolygon(patches.PathPatch):
             x00 = x0 + min(pad, 0.5 * l01) * u01
             x01 = x1 - min(pad, 0.5 * l01) * u01
             x10 = x1 + min(pad, 0.5 * l12) * u12
-            x11 = x2 - min(pad, 0.5 * l12) * u12
 
             if i == 0:
                 verts = [x00, x01, x1, x10]
@@ -60,10 +55,8 @@ class RoundedPolygon(patches.PathPatch):
         return np.atleast_1d(verts, codes)
 
 
-def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : float, rounding_amount : float) -> None:
+def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : float, pad_color : str, rounding_amount : float) -> None:
     '''Generates Voronoi picture with specified parameters'''
-
-    plt.rcParams['figure.figsize'] = (100, 100)
 
     # load image via opencv and fix color channels
     img = cv2.imread(img_path)
@@ -86,7 +79,7 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
     # compute Voronoi tesselation
     vor = Voronoi(points)
 
-    ax = setup_plot(max_x, max_y)
+    ax = setup_plot(max_x, max_y, pad_color)
 
     # for each voronoi region, apply specified padding and rounding
     for region in tqdm(vor.regions, unit='regions'):
@@ -113,28 +106,3 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
 
     # fix the partial result: flip and resize the output of savefig
     flip_and_resize(output_path, max_x, max_y)
-
-def fix_missing_params(input_path : str, output_path : str, n_regions : int, pad : float, round : float) -> tuple[str, str, int, float, float]:
-    '''Computes and returns appropriate default values if they are not specified'''
-
-    # get image size of
-    x, y = imagesize.get(input_path)
-
-    # if not specified, output filename is "inputfilename_out.***"
-    if output_path is None:
-        input_basename, extension = os.path.splitext(input_path)
-        output_path =  input_basename + '_out' + extension
-    
-    # compute default number of regions
-    if n_regions is None:
-       n_regions = int(max(x, y) / 10)
-
-    # compute default region padding
-    if pad is None:
-        pad = max(x, y) / 200
-    
-    # compute default region rounding
-    if round is None:
-        round = max(x, y) / 150
-
-    return input_path, output_path, n_regions, pad, round
