@@ -1,32 +1,38 @@
+import imagesize
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from PIL import Image, ImageOps
 from matplotlib import patches, path
-from scipy.spatial import Voronoi, voronoi_plot_2d
+from scipy.spatial import Voronoi
 import cv2
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.figure import Figure
+from setuptools import setup
+from tqdm import tqdm
 
-plt.rcParams["figure.figsize"] = (100,100)
+from utils import flip_and_resize, setup_plot
 
+def shrink(polygon : np.ndarray, pad : float) -> np.ndarray:
+    '''Returns the shrinked polygon by applying the specified pad'''
 
-def shrink(polygon, pad):
     center = np.mean(polygon, axis=0)
     resized = np.zeros_like(polygon)
-    for ii, point in enumerate(polygon):
+
+    # reduced distance from the region center
+    for i, point in enumerate(polygon):
         vector = point - center
         unit_vector = vector / np.linalg.norm(vector)
-        resized[ii] = point - pad * unit_vector
+        resized[i] = point - pad * unit_vector
+
     return resized
 
 
 class RoundedPolygon(patches.PathPatch):
-    # https://stackoverflow.com/a/66279687/2912349
-    def __init__(self, xy, pad, **kwargs):
+
+    def __init__(self, xy : np.ndarray, pad : float, **kwargs):
         p = path.Path(*self.__round(xy=xy, pad=pad))
         super().__init__(path=p, **kwargs)
 
-    def __round(self, xy, pad):
+    def __round(self, xy : np.ndarray, pad : float):
         n = len(xy)
 
         for i in range(0, n):
@@ -54,54 +60,81 @@ class RoundedPolygon(patches.PathPatch):
         return np.atleast_1d(verts, codes)
 
 
-def generate_voronoi(img_path):
+def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : float, rounding_amount : float) -> None:
+    '''Generates Voronoi picture with specified parameters'''
+
+    plt.rcParams['figure.figsize'] = (100, 100)
+
+    # load image via opencv and fix color channels
     img = cv2.imread(img_path)
     img = img[:, :, [2, 1, 0]]
-    print(img.shape[:2])
 
-    n = 500
+    # image dimentions
     max_y = img.shape[0]
     max_x = img.shape[1]
-    print("max x, max y",max_x, max_y)
 
+    # points of the region centroids
     points = np.c_[np.random.randint(0, max_x, size=n),
                 np.random.randint(0, max_y, size=n)]
 
-        # add 4 distant dummy points
+    # add 4 distant dummy points
     points = np.append(points, [[2 * max_x, 2 * max_y],
                                 [   -max_x, 2 * max_y],
                                 [2 * max_x,    -max_y],
                                 [   -max_x,    -max_y]], axis = 0)
 
-        # compute Voronoi tesselation
+    # compute Voronoi tesselation
     vor = Voronoi(points)
 
-    pad_amount = max(max_x, max_y) / 200
-    rounding_amount = max(max_x, max_y) / 150
+    ax = setup_plot(max_x, max_y)
 
-    print("min_shrink", max(max_x, max_y) / 200)
-    fig, ax = plt.subplots()
-    for region in vor.regions:
+    # for each voronoi region, apply specified padding and rounding
+    for region in tqdm(vor.regions, unit='regions'):
         if region and (not -1 in region):
+
+            # get polygon vertices and shrink based on them
             polygon = np.array([vor.vertices[i] for i in region])
             resized = shrink(polygon, pad_amount)
-            #print(polygon)
-            #print(np.mean(polygon, axis=0))
+
+            # compute x and y of pixel to pick color from
             x, y = np.mean(polygon, axis=0).astype(int)
-            
+            # minding of the border limitations
             x = max(0, min(x, max_x - 1))
             y = max(0, min(y, max_y - 1))
-            
-            #print(RoundedPolygon(resized, 0.2, color=img[x,y]))
-    
-            ax.add_patch(RoundedPolygon(resized, rounding_amount, color=img[y,x] / 255))#plt.cm.Reds(0.5 + 0.5*np.random.rand())))
+            color = img[y, x] / 255
 
-            #break
+            ax.add_patch(RoundedPolygon(resized, rounding_amount, color=color))
+
                 
+    print('FINISHING TOUCHES...')
+    
+    # save partial result
+    plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
 
-    ax.axis([0, max_x, 0, max_y])
-    #ax.axis('off')
-    ax.set_facecolor('black')
-    ax.add_artist(ax.patch)
-    ax.patch.set_zorder(-1)
-    plt.savefig("ECCOLA.jpg", bbox_inches='tight', pad_inches=0)
+    # fix the partial result: flip and resize the output of savefig
+    flip_and_resize(output_path, max_x, max_y)
+
+def fix_missing_params(input_path : str, output_path : str, n_regions : int, pad : float, round : float) -> tuple[str, str, int, float, float]:
+    '''Computes and returns appropriate default values if they are not specified'''
+
+    # get image size of
+    x, y = imagesize.get(input_path)
+
+    # if not specified, output filename is "inputfilename_out.***"
+    if output_path is None:
+        input_basename, extension = os.path.splitext(input_path)
+        output_path =  input_basename + '_out' + extension
+    
+    # compute default number of regions
+    if n_regions is None:
+       n_regions = int(max(x, y) / 10)
+
+    # compute default region padding
+    if pad is None:
+        pad = max(x, y) / 200
+    
+    # compute default region rounding
+    if round is None:
+        round = max(x, y) / 150
+
+    return input_path, output_path, n_regions, pad, round
