@@ -11,7 +11,7 @@ def setup_argparse() -> argparse.Namespace:
     parser.add_argument('--i',
                     type=str,
                     required=False,
-                    default='gradient.png',
+                    default='imgs/gradient.png',
                     help='Input file name on which to pick colors from')
     # output filename argument
     parser.add_argument('--o',

@@ -2,8 +2,8 @@
 
 Command-line-tool to generate customizable Voronoi art from any image.
 
-![Voronoi regions art on color gradient](presentation.png "Example 1")
-![Voronoi regions art on japanese text](presentation_jap.png "Example 2")
+![Voronoi regions art on color gradient](imgs/presentation.png "Example 1")
+![Voronoi regions art on japanese text](imgs/presentation_jap.png "Example 2")
 
 ## USAGE:
     main.py [-h] [--i I] [--o O] [--n N] [--pad PAD] [--round ROUND]
