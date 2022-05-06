@@ -6,7 +6,7 @@ Command-line-tool to generate customizable Voronoi art from any image.
 ![Voronoi regions art on japanese text](imgs/presentation_jap.png "Example 2")
 
 ## USAGE:
-    main.py [-h] [--i I] [--o O] [--n N] [--pad PAD] [--round ROUND]
+    main.py [-h] [--i I] [--o O] [--n N] [--pad PAD] [--pcolor PCOLOR] [--round ROUND]
 
 optional arguments:
 
@@ -19,5 +19,7 @@ optional arguments:
 --n N          Number of Voronoi regions
 
 --pad PAD      Padding amount for each Voronoi region
+
+--pcolor PCOLOR  Padding color in-between Voronoi regions (in hex #RRGGBB)
 
 --round ROUND  Rounding/smoothing amount for each Voronoi region

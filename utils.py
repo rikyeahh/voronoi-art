@@ -41,7 +41,7 @@ def setup_argparse() -> argparse.Namespace:
                     type=color_type,
                     required=False,
                     default="#000000",
-                    help='Padding color in-between Voronoi regions (in hex form #RRGGBB)')
+                    help='Padding color in-between Voronoi regions (in hex #RRGGBB)')
     # rounding of regions argument
     parser.add_argument('--round',
                     type=float,
