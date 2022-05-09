@@ -29,6 +29,8 @@ class RoundedPolygon(patches.PathPatch):
         super().__init__(path=p, **kwargs)
 
     def __round(self, xy : np.ndarray, pad : float):
+        '''Rounds the polygon corners'''
+        
         n = len(xy)
 
         for i in range(0, n):
