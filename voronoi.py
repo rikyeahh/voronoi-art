@@ -5,7 +5,7 @@ from scipy.spatial import Voronoi
 import cv2
 from tqdm import tqdm
 
-from utils import flip_and_resize, setup_plot
+from utils import setup_plot
 
 def shrink(polygon : np.ndarray, pad : float) -> np.ndarray:
     '''Returns the shrinked polygon by applying the specified pad'''
@@ -63,8 +63,7 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
     img = img[:, :, [2, 1, 0]]
 
     # image dimentions
-    max_y = img.shape[0]
-    max_x = img.shape[1]
+    max_y, max_x = img.shape[0], img.shape[1]
 
     # points of the region centroids
     points = np.c_[np.random.randint(0, max_x, size=n),
@@ -94,15 +93,9 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
             # minding of the border limitations
             x = max(0, min(x, max_x - 1))
             y = max(0, min(y, max_y - 1))
-            color = img[y, x] / 255
+            color = img[max_y - y - 1, x] / 255
 
             ax.add_patch(RoundedPolygon(resized, rounding_amount, color=color))
-
-                
-    print('FINISHING TOUCHES...')
     
-    # save partial result
+    # save result
     plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
-
-    # fix the partial result: flip and resize the output of savefig
-    flip_and_resize(output_path, max_x, max_y)

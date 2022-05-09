@@ -84,24 +84,29 @@ def fix_missing_params(args) -> tuple[str, str, int, float, str, float]:
 
     return input_path, output_path, n_regions, pad, pcolor, round
 
-def flip_and_resize(img_path : str, x : int, y : int) -> None:
-    '''Flips vertically and resized the image in the specified path'''
-
-    # load and resize
-    img = Image.open(img_path)
-    img = img.resize((x, y))
-    # flip and save
-    img = ImageOps.flip(img)
-    img.save(img_path)
-
 def setup_plot(x : int, y : int, pad_color : str):
     '''Sets up matplotlib print canvas and returns it'''
 
-    plt.rcParams['figure.figsize'] = (100, 100)
-    _, ax = plt.subplots()
+    #print(x, y)
+
+    #px = 1 / plt.rcParams['figure.dpi']  # pixel in inches
+    _, ax = plt.subplots(figsize=(x / 100, y / 100))
+
+    #plt.rcParams['figure.figsize'] = (x / 100, y / 100)
+    #_, ax = plt.subplots()
     ax.axis([0, x, 0, y])
     ax.axis('off')
     ax.set_facecolor(pad_color)
     ax.add_artist(ax.patch)
     ax.patch.set_zorder(-1)
+    # setup ax size in pixels
+    l = ax.figure.subplotpars.left
+    r = ax.figure.subplotpars.right
+    t = ax.figure.subplotpars.top
+    b = ax.figure.subplotpars.bottom
+    figw = float(x / 100) / (r - l)
+    figh = float(y / 100) / (t - b)
+    ax.figure.set_size_inches(figw, figh)
+
+    #print(ax.bbox.width, ax.bbox.height)
     return ax
