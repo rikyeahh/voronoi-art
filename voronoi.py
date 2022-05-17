@@ -1,3 +1,4 @@
+from xml.etree.ElementInclude import include
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import patches, path
@@ -5,7 +6,7 @@ from scipy.spatial import Voronoi
 import cv2
 from tqdm import tqdm
 
-from utils import setup_plot
+from utils import numpy_from_ax, setup_plot
 
 def shrink(polygon : np.ndarray, pad : float) -> np.ndarray:
     '''Returns the shrinked polygon by applying the specified pad'''
@@ -99,5 +100,5 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
 
             ax.add_patch(RoundedPolygon(resized, rounding_amount, color=color))
     
-    # save result
-    plt.savefig(output_path, bbox_inches='tight', pad_inches=0)
+    result = numpy_from_ax(ax)
+    return result
