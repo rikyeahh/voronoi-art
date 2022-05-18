@@ -7,12 +7,13 @@ from PIL import Image, ImageTk
 from utils import fix_missing_params2
 from voronoi import generate_voronoi
 import numpy as np
+import cv2
 
 
 class Example(Frame):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, master):
+        super().__init__(master)
         self._init_ui()
         self._set_default_params()
         self._update_img()
@@ -104,10 +105,13 @@ class Example(Frame):
 
     def _update_img(self):
         # TODO
-        
         #voronoi = np.random.randint(255, size=(2000, 2000, 3), dtype=np.uint8)
         voronoi = generate_voronoi(self.input_path, self.output_path, self.n_regions, self.padding_amount, self.pad_color, self.rounding_amount)
+        
         voronoi = voronoi.astype(np.uint8)
+        voronoi = cv2.cvtColor(voronoi, cv2.COLOR_BGR2RGB)
+        print(self.get_voronoi_params())
+        print(np.mean(voronoi))
         new_img = Image.fromarray(voronoi).resize((200, 200))
         new_img = ImageTk.PhotoImage(new_img)
         self.img_label.configure(image=new_img)
@@ -175,7 +179,7 @@ class Example(Frame):
 
 
     def _choose_color(self):
-        self.pad_color = askcolor()[1]
+        self.pad_color = askcolor()[1] or '#000000'
         self.pad_color_canvas.config(bg=self.pad_color, text='        ')
         self._update_debug_label()
         self._update_img()
@@ -184,7 +188,7 @@ class Example(Frame):
 def main():
     root = Tk()
     root.geometry("500x500")
-    app = Example()
+    app = Example(root)
     root.mainloop()
 
 if __name__ == '__main__':

@@ -5,6 +5,7 @@ from matplotlib import patches, path
 from scipy.spatial import Voronoi
 import cv2
 from tqdm import tqdm
+import numpy as np
 
 from utils import numpy_from_ax, setup_plot
 
@@ -60,7 +61,7 @@ class RoundedPolygon(patches.PathPatch):
 
 def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : float, pad_color : str, rounding_amount : float) -> None:
     '''Generates Voronoi picture with specified parameters'''
-
+    
     # load image via opencv and fix color channels
     img = cv2.imread(img_path)
     img = img[:, :, [2, 1, 0]]
@@ -81,6 +82,8 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
     # compute Voronoi tesselation
     vor = Voronoi(points)
 
+    
+    #return np.random.randint(255, size=(2000, 2000, 3), dtype=np.uint8)
     ax = setup_plot(max_x, max_y, pad_color)
 
     # for each voronoi region, apply specified padding and rounding
