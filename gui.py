@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter.filedialog import asksaveasfile
 from tkinter.colorchooser import askcolor
 from PIL import Image, ImageTk
+import matplotlib.pyplot as plt
 
 from utils import fix_missing_params2
 from voronoi import generate_voronoi
@@ -105,14 +106,14 @@ class Example(Frame):
 
     def _update_img(self):
         # TODO
-        #voronoi = np.random.randint(255, size=(2000, 2000, 3), dtype=np.uint8)
-        voronoi = generate_voronoi(self.input_path, self.output_path, self.n_regions, self.padding_amount, self.pad_color, self.rounding_amount)
+        plt.figure()
+        voronoi = np.random.randint(255, size=(1108, 1674, 3), dtype=np.uint8)
+        #voronoi2 = generate_voronoi(self.input_path, self.output_path, self.n_regions, self.padding_amount, self.pad_color, self.rounding_amount)
         
         voronoi = voronoi.astype(np.uint8)
         voronoi = cv2.cvtColor(voronoi, cv2.COLOR_BGR2RGB)
-        print(self.get_voronoi_params())
         print(np.mean(voronoi))
-        new_img = Image.fromarray(voronoi).resize((200, 200))
+        new_img = Image.fromarray(voronoi).resize((300, 300))
         new_img = ImageTk.PhotoImage(new_img)
         self.img_label.configure(image=new_img)
         self.img = new_img
@@ -147,7 +148,6 @@ class Example(Frame):
                 ('PNGs', '*.png'),
                 ('JPGs', '*.jpg')]
         file = asksaveasfile(filetypes=files, defaultextension=files)
-        #print(file.name)
 
     def _update_GUI_after_slider(self):
         # get values from sliders

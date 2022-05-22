@@ -38,9 +38,9 @@ class Example(Frame):
         self.input_path = "jap.jpg"
         self.output_path = "jap_out.jpg"
         self.n_regions = 100
-        self.padding_amount = 10
+        self.padding_amount = 0
         self.pad_color = "#000000"
-        self.rounding_amount = 10
+        self.rounding_amount = 0
 
 
 def main():

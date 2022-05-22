@@ -121,13 +121,16 @@ def fix_missing_params2(input_path, output_path, n_regions, padding, pad_color, 
 
 def setup_plot(x : int, y : int, pad_color : str):
     '''Sets up matplotlib paint axes and returns it'''
-
-    _, ax = plt.subplots(figsize=(x / 100, y / 100))
+    #ax = plt.subplot(figsize=(x / 100, y / 100))#figsize=(x / 100, y / 100))
+    fig = plt.figure()
+    return None
     ax.axis([0, x, 0, y])
     ax.axis('off')
     ax.set_facecolor(pad_color)
     ax.add_artist(ax.patch)
     ax.patch.set_zorder(-1)
+    ax.set_position([0, 0, 1, 1])
+    return ax
 
     # setup ax size in pixels
     l = ax.figure.subplotpars.left
