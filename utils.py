@@ -122,25 +122,17 @@ def fix_missing_params2(input_path, output_path, n_regions, padding, pad_color, 
 def setup_plot(x : int, y : int, pad_color : str):
     '''Sets up matplotlib paint axes and returns it'''
     #ax = plt.subplot(figsize=(x / 100, y / 100))#figsize=(x / 100, y / 100))
-    fig = plt.figure()
-    return None
+    fig = plt.Figure(figsize=(x / 100, y / 100))
+    #ax = fig.axes[0]
+    ax = fig.add_subplot(111)
+    #print(fig.axes)
+    #return None
     ax.axis([0, x, 0, y])
     ax.axis('off')
     ax.set_facecolor(pad_color)
     ax.add_artist(ax.patch)
     ax.patch.set_zorder(-1)
     ax.set_position([0, 0, 1, 1])
-    return ax
-
-    # setup ax size in pixels
-    l = ax.figure.subplotpars.left
-    r = ax.figure.subplotpars.right
-    t = ax.figure.subplotpars.top
-    b = ax.figure.subplotpars.bottom
-    figw = float(x / 100) / (r - l)
-    figh = float(y / 100) / (t - b)
-    ax.figure.set_size_inches(figw, figh)
-
     return ax
 
 def numpy_from_ax(ax, **kwargs):
@@ -151,8 +143,11 @@ def numpy_from_ax(ax, **kwargs):
     trans = ax.figure.dpi_scale_trans.inverted() 
     bbox = ax.bbox.transformed(trans)
     buff = io.BytesIO()
-    plt.savefig(buff, format="png", dpi=ax.figure.dpi, bbox_inches=bbox,  **kwargs)
+    # savefig via fig to avoid window size and zombie process bug
+    fig = ax.get_figure()
+    fig.savefig(buff)
     ax.axis("on")
+
     buff.seek(0)
     im = plt.imread(buff)
     im = im[:,:,:3] * 255

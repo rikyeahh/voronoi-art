@@ -85,7 +85,7 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
     
     #return np.random.randint(255, size=(2000, 2000, 3), dtype=np.uint8)
     ax = setup_plot(max_x, max_y, pad_color)
-    return np.random.randint(255, size=(1108, 1674, 3), dtype=np.uint8)
+    
 
     # for each voronoi region, apply specified padding and rounding
     for region in tqdm(vor.regions, unit='regions'):
@@ -103,6 +103,6 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
             color = img[max_y - y - 1, x] / 255
 
             ax.add_patch(RoundedPolygon(resized, rounding_amount, color=color))
-    
+
     result = numpy_from_ax(ax)
     return result

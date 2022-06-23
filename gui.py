@@ -105,10 +105,7 @@ class Example(Frame):
         self.debug_label.grid(column=0, row=4)
 
     def _update_img(self):
-        # TODO
-        plt.figure()
-        voronoi = np.random.randint(255, size=(1108, 1674, 3), dtype=np.uint8)
-        #voronoi2 = generate_voronoi(self.input_path, self.output_path, self.n_regions, self.padding_amount, self.pad_color, self.rounding_amount)
+        voronoi = generate_voronoi(self.input_path, self.output_path, self.n_regions, self.padding_amount, self.pad_color, self.rounding_amount)
         
         voronoi = voronoi.astype(np.uint8)
         voronoi = cv2.cvtColor(voronoi, cv2.COLOR_BGR2RGB)
