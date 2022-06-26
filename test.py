@@ -12,8 +12,6 @@ class Example(Tk):
 
     def __init__(self):
         plt.Figure()
-        #plt.close()
-        
         super().__init__()
         self._init_menubar()
 
