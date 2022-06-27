@@ -121,12 +121,9 @@ def fix_missing_params2(input_path, output_path, n_regions, padding, pad_color, 
 
 def setup_plot(x : int, y : int, pad_color : str):
     '''Sets up matplotlib paint axes and returns it'''
-    #ax = plt.subplot(figsize=(x / 100, y / 100))#figsize=(x / 100, y / 100))
+
     fig = plt.Figure(figsize=(x / 100, y / 100))
-    #ax = fig.axes[0]
     ax = fig.add_subplot(111)
-    #print(fig.axes)
-    #return None
     ax.axis([0, x, 0, y])
     ax.axis('off')
     ax.set_facecolor(pad_color)
@@ -135,7 +132,7 @@ def setup_plot(x : int, y : int, pad_color : str):
     ax.set_position([0, 0, 1, 1])
     return ax
 
-def numpy_from_ax(ax, **kwargs):
+def numpy_from_ax(ax):
     '''Returns numpy array representation of image from specified ax'''
     
     ax.axis("off")

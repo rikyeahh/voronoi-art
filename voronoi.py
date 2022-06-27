@@ -1,6 +1,4 @@
-from xml.etree.ElementInclude import include
 import numpy as np
-import matplotlib.pyplot as plt
 from matplotlib import patches, path
 from scipy.spatial import Voronoi
 import cv2
@@ -10,7 +8,7 @@ import numpy as np
 from utils import numpy_from_ax, setup_plot
 
 def shrink(polygon : np.ndarray, pad : float) -> np.ndarray:
-    '''Returns the shrinked polygon by applying the specified pad'''
+    '''Returns the shrinked polygon by applying the specified padding'''
 
     center = np.mean(polygon, axis=0)
     resized = np.zeros_like(polygon)
@@ -23,10 +21,9 @@ def shrink(polygon : np.ndarray, pad : float) -> np.ndarray:
 
     return resized
 
-
 class RoundedPolygon(patches.PathPatch):
 
-    def __init__(self, xy : np.ndarray, pad : float, **kwargs):
+    def __init__(self, xy : np.ndarray, pad : float, **kwargs) -> None:
         p = path.Path(*self.__round(xy=xy, pad=pad))
         super().__init__(path=p, **kwargs)
 
@@ -58,8 +55,7 @@ class RoundedPolygon(patches.PathPatch):
 
         return np.atleast_1d(verts, codes)
 
-
-def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : float, pad_color : str, rounding_amount : float) -> None:
+def generate_voronoi(img_path : str, n : int, pad_amount : float, pad_color : str, rounding_amount : float) -> np.ndarray:
     '''Generates Voronoi picture with specified parameters'''
     
     # load image via opencv and fix color channels
@@ -78,14 +74,11 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
                                 [   -max_x, 2 * max_y],
                                 [2 * max_x,    -max_y],
                                 [   -max_x,    -max_y]], axis = 0)
-
     # compute Voronoi tesselation
     vor = Voronoi(points)
-    
-    
+
     #return np.random.randint(255, size=(2000, 2000, 3), dtype=np.uint8)
     ax = setup_plot(max_x, max_y, pad_color)
-    
 
     # for each voronoi region, apply specified padding and rounding
     for region in tqdm(vor.regions, unit='regions'):
@@ -104,5 +97,4 @@ def generate_voronoi(img_path : str, output_path : str, n : int, pad_amount : fl
 
             ax.add_patch(RoundedPolygon(resized, rounding_amount, color=color))
 
-    result = numpy_from_ax(ax)
-    return result
+    return numpy_from_ax(ax)

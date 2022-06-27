@@ -2,26 +2,27 @@ from tkinter import Tk, Frame, Menu
 import tkinter as tk
 from tkinter.filedialog import asksaveasfile
 from tkinter.colorchooser import askcolor
+from typing import Tuple
 from PIL import Image, ImageTk
 from tkinter import filedialog
-
-from utils import fix_missing_params2
-from voronoi import generate_voronoi
 import numpy as np
 import cv2
 
+from utils import fix_missing_params2
+from voronoi import generate_voronoi
 
-class Example(Frame):
+class GUI(Frame):
 
-    def __init__(self, master):
+    def __init__(self, master : Tk) -> None:
         super().__init__(master)
+
         self._init_ui()
         self._set_default_params()
         self._update_img()
 
 
-    def _init_menubar(self):
-        self.master.title("Simple menu")
+    def _init_menubar(self) -> None:
+        '''Builds top menu bar in the GUI'''
 
         menubar = Menu(self.master)
         # Save
@@ -31,9 +32,11 @@ class Example(Frame):
         # Help
         menubar.add_cascade(label="Help", command=lambda: self._help_popup())
         
-        self.master.config(menu=menubar)
+        self.master.configure(menu=menubar)
 
-    def _init_n_regions_gui(self):
+    def _init_n_regions_gui(self) -> None:
+        '''Builds n regions input part in the GUI'''
+
         window = self.master
         # label for number of regions
         self.n_regions_lbl = tk.Label(window, text="# Voronoi regions")
@@ -41,51 +44,50 @@ class Example(Frame):
         # textbox for number of regions
         self.n_regions_stringvar = tk.StringVar()
         self.n_regions_stringvar.trace("w", lambda name, index, mode, var=self.n_regions_stringvar: self._update_GUI_after_textbox())
-        #Create an Entry widget
         self.n_regions_entry = tk.Entry(window, textvariable=self.n_regions_stringvar)
         self.n_regions_entry.grid(column=0, row=1)
-
         # slider for number of regions
         self.n_regions_slider = tk.Scale(window, from_=0, to=200, orient=tk.HORIZONTAL)
         self.n_regions_slider.bind("<ButtonRelease-1>", lambda _: self._update_GUI_after_slider())
         self.n_regions_slider.grid(column=0, row=2)
 
-    def _init_padding_gui(self):
+    def _init_padding_gui(self) -> None:
+        '''Builds padding input part in the GUI'''
+
         window = self.master
         # label for padding amount
         self.padding_lbl = tk.Label(window, text="Padding amount")
         self.padding_lbl.grid(column=1, row=0)
-
         # textbox for padding amount
         self.padding_stringvar = tk.StringVar()
         self.padding_stringvar.trace("w", lambda name, index, mode, var=self.padding_stringvar: self._update_GUI_after_textbox())
-        #Create an Entry widget
         self.padding_entry = tk.Entry(window, textvariable=self.padding_stringvar)
         self.padding_entry.grid(column=1, row=1)
-
         # slider for padding amount
         self.padding_slider = tk.Scale(window, from_=0, to=200, orient=tk.HORIZONTAL)
         self.padding_slider.bind("<ButtonRelease-1>", lambda _: self._update_GUI_after_slider())
         self.padding_slider.grid(column=1, row=2)
 
-    def _init_rounding_gui(self):
+    def _init_rounding_gui(self) -> None:
+        '''Builds rounding input part in the GUI'''
+
         window = self.master
         # label for rounding amount
         self.rounding_lbl = tk.Label(window, text="Rounding amount")
         self.rounding_lbl.grid(column=2, row=0)
-
         # textbox for rounding amount
         self.rounding_stringvar = tk.StringVar()
         self.rounding_stringvar.trace("w", lambda name, index, mode, var=self.rounding_stringvar: self._update_GUI_after_textbox())
         self.rounding_entry = tk.Entry(window, textvariable=self.rounding_stringvar)
         self.rounding_entry.grid(column=2, row=1)
-
         # slider for rounding amount
         self.rounding_slider = tk.Scale(window, from_=0, to=200, orient=tk.HORIZONTAL)
         self.rounding_slider.bind("<ButtonRelease-1>", lambda _: self._update_GUI_after_slider())
         self.rounding_slider.grid(column=2, row=2)
     
-    def _init_pad_color_gui(self):
+    def _init_pad_color_gui(self) -> None:
+        '''Builds background color input part in the GUI'''
+
         window = self.master
         # label background color
         self.pad_color_lbl = tk.Label(window, text="BG color")
@@ -98,7 +100,8 @@ class Example(Frame):
         self.pad_color_btn = tk.Button(text="Choose color", command=lambda: self._choose_color())
         self.pad_color_btn.grid(column=3, row=2)
 
-    def _init_image_gui(self):
+    def _init_image_gui(self) -> None:
+        '''Builds image canvas in the GUI'''
 
         # Create an object of tkinter ImageTk
         self.img = Image.open("jap.jpg").resize((300,300))
@@ -108,12 +111,14 @@ class Example(Frame):
         self.img_label = tk.Label(image=self.img)
         self.img_label.grid(column=0, row=3, columnspan=4)
 
-    def _init_ui(self):
+    def _init_ui(self) -> None:
+        '''Builds the GUI'''
 
         # flag to prevent voronoi generation when .set is called on textboxes
         # from the _update_GUI_after_slider method
         self._inhibit_voronoi_generation = False
 
+        # init all GUI parts
         self._init_menubar()
         self._init_n_regions_gui()
         self._init_padding_gui()
@@ -121,32 +126,35 @@ class Example(Frame):
         self._init_pad_color_gui()
         self._init_image_gui()
 
-        self.debug_label = tk.Label(self.master, text="WELCOME")
-        self.debug_label.grid(column=0, row=4)
-
-    def _update_img(self):
+    def _update_img(self) -> None:
+        '''Generates a new voronoi image and shows it'''
 
         # flag to prevent voronoi generation when .set is called on textboxes
         # from the _update_GUI_after_slider method
         if self._inhibit_voronoi_generation:
             return
-        voronoi = generate_voronoi(self.input_path, self.output_path, self.n_regions, self.padding_amount, self.pad_color, self.rounding_amount)
-        
+        voronoi = generate_voronoi(self.input_path, self.n_regions, self.padding_amount, self.pad_color, self.rounding_amount)
+    
+        # convert and resize image
         voronoi = voronoi.astype(np.uint8)
+        self.img_as_numpy = voronoi # this will be the output when saved
         voronoi = cv2.cvtColor(voronoi, cv2.COLOR_BGR2RGB)
         new_img = Image.fromarray(voronoi).resize((300, 300))
+        # update image in the GUI
         new_img = ImageTk.PhotoImage(new_img)
         self.img_label.configure(image=new_img)
         self.img = new_img
+        
     
-    def get_voronoi_params(self):
-        return [self.input_path, self.output_path, self.n_regions, self.padding_amount, self.pad_color, self.rounding_amount]
-    
-    def _update_debug_label(self):
-        info = ", ".join(map(str, self.get_voronoi_params()))
-        self.debug_label.config(text=info)
+    def _get_voronoi_params(self) -> Tuple[str, str, int, int, str, int]:
+        '''Get all parameters for the image generation, mainly for debug'''
 
-    def _set_default_params(self, input_path="jap.jpg"):
+        return self.input_path, self.output_path, self.n_regions, self.padding_amount, self.pad_color, self.rounding_amount
+    
+
+    def _set_default_params(self, input_path="jap.jpg") -> None:
+        '''Determines default parameters for the specified image'''
+
         self.input_path = input_path
         params = fix_missing_params2(self.input_path, None, None, None, None, None)
         self.output_path = params[1]
@@ -155,25 +163,29 @@ class Example(Frame):
         self.pad_color = params[4]
         self.rounding_amount = int(params[5])
 
-    def _onExit(self):
-        self.quit()
+    def _help_popup(self) -> None:
+        '''Pops up a window for help'''
 
-    def _help_popup(self):
         top = tk.Toplevel(self.master)
         top.geometry("750x250")
         top.title("Child Window")
         tk.Label(top, text="Hello World!").place(x=150, y=80)
 
-    def _save_as(self):
+    def _save_as(self) -> None:
+        '''Pops up window to choose save location and name, and saves the result'''
         files = [('All Files', '*.*'), 
                 ('PNGs', '*.png'),
                 ('JPGs', '*.jpg')]
-        filename = asksaveasfile(filetypes=files, defaultextension=files).name
-        # TODO FIX NOT OPENABLE IMG
-        cv2.imwrite(filename, self.img)
+        file = asksaveasfile(filetypes=files, defaultextension=".png")
+        if file is not None:
+            print(type(self.img_as_numpy))
+            print(self.img_as_numpy)
+            # TODO FIX NOT OPENABLE IMG
+            cv2.imwrite(file.name, self.img_as_numpy)
+        
 
-    def _update_GUI_after_slider(self):
-        print("Slider listener")
+    def _update_GUI_after_slider(self) -> None:
+        '''Sliders listener, update GUI with new values'''
 
         # get values from sliders
         n_regions = self.n_regions_slider.get()
@@ -187,14 +199,15 @@ class Example(Frame):
         self.rounding_stringvar.set(str(rounding_amount))
         self._inhibit_voronoi_generation = False
         # set instance fields after .set because it assigns self.var....
-        self.n_regions = n_regions
-        self.padding_amount = padding_amount
-        self.rounding_amount = rounding_amount
+        self.n_regions = int(n_regions)
+        self.padding_amount = int(padding_amount)
+        self.rounding_amount = int(rounding_amount)
 
-        self._update_debug_label()
         self._update_img()
 
     def _validate_textbox_value(self, text : str) -> int:
+        '''Validates input from the textboxes, popup if invalid'''
+
         if text.strip() == '':
             return 0
         try:
@@ -206,6 +219,8 @@ class Example(Frame):
         return value
 
     def _invalid_input_popup(self, text : str) -> None:
+        '''Pops up error window with given text'''
+
         top = tk.Toplevel(self.master)
         top.geometry("750x250")
         top.title("Error")
@@ -213,7 +228,7 @@ class Example(Frame):
 
 
     def _update_GUI_after_textbox(self) -> None:
-        print("Textbox listener", self._inhibit_voronoi_generation)
+        '''Textbox listener, update GUI with new values'''
 
         # get values from textboxes
         self.n_regions = self._validate_textbox_value(self.n_regions_entry.get())
@@ -225,7 +240,6 @@ class Example(Frame):
         self.padding_slider.set(self.padding_amount)
         self.rounding_slider.set(self.rounding_amount)
 
-        self._update_debug_label()
         self._update_img()
 
 
@@ -234,7 +248,7 @@ class Example(Frame):
 
         self.pad_color = askcolor()[1] or '#000000'
         self.pad_color_canvas.config(bg=self.pad_color, text='        ')
-        self._update_debug_label()
+
         self._update_img()
     
     def _choose_filepath(self) -> None:
@@ -243,7 +257,7 @@ class Example(Frame):
         self.input_path = filedialog.askopenfilename()
         self._set_default_params(self.input_path)
         self._update_gui_from_internal_params()
-        self._update_debug_label()
+
         self._update_img()
 
     def _update_gui_from_internal_params(self) -> None:
@@ -261,11 +275,10 @@ class Example(Frame):
         self.rounding_stringvar.set(str(rounding_amount))
         self._inhibit_voronoi_generation = False
 
-
 def main() -> None:
     root = Tk()
     root.geometry("500x500")
-    app = Example(root)
+    app = GUI(root)
     root.mainloop()
 
 if __name__ == '__main__':
