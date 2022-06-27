@@ -14,8 +14,8 @@ from voronoi import generate_voronoi
 class GUI(Frame):
 
     def __init__(self, master : Tk) -> None:
-        super().__init__(master)
 
+        super().__init__(master)
         self._init_ui()
         self._set_default_params()
         self._update_img()
@@ -168,11 +168,16 @@ class GUI(Frame):
 
         top = tk.Toplevel(self.master)
         top.geometry("750x250")
-        top.title("Child Window")
-        tk.Label(top, text="Hello World!").place(x=150, y=80)
+        top.title("Help and info")
+        txt = '''
+        Project by Riccardo Rorato.
+        For bugs or improvements, submit a PR or contact me at riccardororato99@gmail.com
+        '''
+        tk.Label(top, text=txt).place(x=150, y=80)
 
     def _save_as(self) -> None:
         '''Pops up window to choose save location and name, and saves the result'''
+
         files = [('All Files', '*.*'), 
                 ('PNGs', '*.png'),
                 ('JPGs', '*.jpg')]
@@ -277,6 +282,7 @@ class GUI(Frame):
 
 def main() -> None:
     root = Tk()
+    root.title("Voronoi art Generator")
     root.geometry("500x500")
     app = GUI(root)
     root.mainloop()
